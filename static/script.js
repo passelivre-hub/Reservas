@@ -14,22 +14,44 @@ document.addEventListener('DOMContentLoaded', function() {
   const calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: 'dayGridMonth',
     selectable: true,
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth,timeGridWeek,listWeek'
+    },
+    views: {
+      dayGridMonth: { buttonText: 'Mês' },
+      timeGridWeek: { buttonText: 'Semana' },
+      listWeek: { buttonText: 'Lista' }
+    },
+    selectable: true,
     select: function(info) {
       openCreateModal(info.startStr, info.endStr);
+    },
+    eventClick: function(info) {
+      currentEvent = info.event;
+      openEditModal(info.event);
     },
     eventDidMount: function(info) {
       const c = info.event.extendedProps.chale;
       if (c == 1) info.el.style.backgroundColor = '#4caf50';
       if (c == 2) info.el.style.backgroundColor = '#2196f3';
       if (c == 3) info.el.style.backgroundColor = '#ff9800';
-    },
-    eventClick: function(info) {
-      currentEvent = info.event;
-      openEditModal(info.event);
     }
   });
 
   calendar.render();
+
+  // 🔹 Ajuste de view para celular
+  function resizeCalendar() {
+    if(window.innerWidth < 600){
+      calendar.changeView('listWeek');
+    } else {
+      calendar.changeView('dayGridMonth');
+    }
+  }
+  window.addEventListener('resize', resizeCalendar);
+  resizeCalendar();
 
   function fetchEvents(){
     fetch('/reservas')
@@ -70,7 +92,6 @@ document.addEventListener('DOMContentLoaded', function() {
     form.reset();
     form.elements['id'].value = event.id;
     form.elements['chale'].value = event.extendedProps.chale;
-    // title contains Chalé X — nome, but we read nome separately from extendedProps if needed
     form.elements['nome'].value = event.title.split(' — ').slice(1).join(' — ') || '';
     form.elements['telefone'].value = event.extendedProps.telefone || '';
     form.elements['valor'].value = event.extendedProps.valor || '';
@@ -79,7 +100,11 @@ document.addEventListener('DOMContentLoaded', function() {
     form.elements['saida'].value = event.endStr ? event.endStr.slice(0,10) : event.startStr.slice(0,10);
   }
 
-  function closeModal(){ modal.classList.add('hidden'); form.reset(); currentEvent = null; }
+  function closeModal(){ 
+    modal.classList.add('hidden'); 
+    form.reset(); 
+    currentEvent = null; 
+  }
 
   cancelBtn.addEventListener('click', closeModal);
   modal.addEventListener('click', (ev)=>{ if (ev.target === modal) closeModal(); });
