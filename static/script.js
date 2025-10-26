@@ -8,11 +8,12 @@ document.addEventListener('DOMContentLoaded', function() {
   const saveBtn = document.getElementById('saveBtn');
   const updateBtn = document.getElementById('updateBtn');
   const removeBtn = document.getElementById('removeBtn');
+  const telefoneInput = document.getElementById('telefone');
 
   let currentEvent = null;
 
   const calendar = new FullCalendar.Calendar(calendarEl, {
-    initialView: 'dayGridMonth',
+    initialView: window.innerWidth < 600 ? 'listWeek' : 'dayGridMonth',
     selectable: true,
     headerToolbar: {
       left: 'prev,next today',
@@ -24,7 +25,6 @@ document.addEventListener('DOMContentLoaded', function() {
       timeGridWeek: { buttonText: 'Semana' },
       listWeek: { buttonText: 'Lista' }
     },
-    selectable: true,
     select: function(info) {
       openCreateModal(info.startStr, info.endStr);
     },
@@ -69,27 +69,36 @@ document.addEventListener('DOMContentLoaded', function() {
   chaleFilter.addEventListener('change', fetchEvents);
   fetchEvents();
 
+  // 🟢 Criação de nova reserva
   function openCreateModal(start, end){
     currentEvent = null;
-    modalTitle.textContent = 'Criar reserva';
+    modalTitle.textContent = 'Nova reserva';
     saveBtn.classList.remove('hidden');
     updateBtn.classList.add('hidden');
     removeBtn.classList.add('hidden');
     modal.classList.remove('hidden');
     form.reset();
+
     const entrada = start.slice(0,10);
-    const saida = (end) ? new Date(new Date(end).getTime() - 24*60*60*1000).toISOString().slice(0,10) : entrada;
+    const saida = (end)
+      ? new Date(new Date(end).getTime() - 24*60*60*1000).toISOString().slice(0,10)
+      : entrada;
+
     form.elements['entrada'].value = entrada;
     form.elements['saida'].value = saida;
+
+    setTimeout(() => form.elements['nome'].focus(), 100); // foca no campo nome no mobile
   }
 
+  // 🟡 Edição de reserva existente
   function openEditModal(event){
-    modalTitle.textContent = 'Editar reserva';
+    modalTitle.textContent = `Reserva nº${event.id}`;
     saveBtn.classList.add('hidden');
     updateBtn.classList.remove('hidden');
     removeBtn.classList.remove('hidden');
     modal.classList.remove('hidden');
     form.reset();
+
     form.elements['id'].value = event.id;
     form.elements['chale'].value = event.extendedProps.chale;
     form.elements['nome'].value = event.title.split(' — ').slice(1).join(' — ') || '';
@@ -98,6 +107,16 @@ document.addEventListener('DOMContentLoaded', function() {
     form.elements['observacao'].value = event.extendedProps.observacao || '';
     form.elements['entrada'].value = event.startStr.slice(0,10);
     form.elements['saida'].value = event.endStr ? event.endStr.slice(0,10) : event.startStr.slice(0,10);
+
+    // 🔗 Mostra link do WhatsApp se tiver telefone
+    const t = event.extendedProps.telefone || '';
+    const clean = t.replace(/\D/g, '');
+    const linkArea = document.getElementById('whatsappLinkArea');
+    if (clean.length >= 11) {
+      linkArea.innerHTML = `<a href="https://wa.me/55${clean}" target="_blank" class="whatsapp-link">📱 Enviar WhatsApp</a>`;
+    } else {
+      linkArea.innerHTML = '';
+    }
   }
 
   function closeModal(){ 
@@ -109,7 +128,7 @@ document.addEventListener('DOMContentLoaded', function() {
   cancelBtn.addEventListener('click', closeModal);
   modal.addEventListener('click', (ev)=>{ if (ev.target === modal) closeModal(); });
 
-  // create
+  // 🟩 Criar
   form.addEventListener('submit', function(e){
     e.preventDefault();
     if (saveBtn.classList.contains('hidden')) return;
@@ -126,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }).catch(err=>alert('Erro: '+err));
   });
 
-  // update
+  // 🟦 Atualizar
   updateBtn.addEventListener('click', function(){
     const fd = new FormData(form);
     fetch('/atualizar', { method: 'POST', body: fd })
@@ -141,7 +160,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }).catch(err=>alert('Erro: '+err));
   });
 
-  // remove
+  // 🟥 Remover
   removeBtn.addEventListener('click', function(){
     if (!confirm('Remover esta reserva?')) return;
     const fd = new FormData();
@@ -156,5 +175,18 @@ document.addEventListener('DOMContentLoaded', function() {
           alert('Erro: ' + (resp.error||'unknown'));
         }
       }).catch(err=>alert('Erro: '+err));
+  });
+
+  // 📱 Máscara do telefone
+  telefoneInput.addEventListener('input', () => {
+    let v = telefoneInput.value.replace(/\D/g, '');
+    if (v.length > 11) v = v.slice(0,11);
+    if (v.length > 6) {
+      telefoneInput.value = `(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`;
+    } else if (v.length > 2) {
+      telefoneInput.value = `(${v.slice(0,2)}) ${v.slice(2)}`;
+    } else {
+      telefoneInput.value = v;
+    }
   });
 });
