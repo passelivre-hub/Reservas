@@ -4,14 +4,14 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  background: #f0f4fa; /* azul claro suave de fundo */
+  background: #002855; /* azul institucional Pantone 302c */
 }
 
 .container {
   max-width: 1100px;
   margin: 20px auto;
   padding: 20px;
-  background: #fff;
+  background: #fff; /* mantém branco para contraste do calendário e formulário */
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.15);
 }
@@ -20,7 +20,7 @@ h1 {
   margin-top: 0;
   font-size: 2em;
   text-align: center;
-  color: #0057B7; /* azul corporativo */
+  color: #FFD700; /* amarelo Pantone para destaque no azul */
   font-weight: bold;
 }
 
