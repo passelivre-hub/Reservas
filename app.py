@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify, g
 import sqlite3
-from datetime import datetime
+from datetime import datetime, date
 
 DATABASE = 'reservas.db'
 
@@ -39,9 +39,11 @@ def init_db():
 
 # --- util: verifica conflito ---
 def parse_date(s):
+    # espera 'YYYY-MM-DD'
     return datetime.strptime(s, '%Y-%m-%d').date()
 
 def has_conflict(chale, nova_entrada, nova_saida, exclude_id=None):
+    """Retorna True se existe conflito para o chalé entre [nova_entrada, nova_saida)"""
     db = get_db()
     params = [chale]
     query = 'SELECT * FROM reservas WHERE chale = ?'
@@ -56,11 +58,12 @@ def has_conflict(chale, nova_entrada, nova_saida, exclude_id=None):
     for r in rows:
         exist_start = parse_date(r['entrada'])
         exist_end = parse_date(r['saida'])
+        # conflito se os intervalos se interceptam
         if not (new_end <= exist_start or new_start >= exist_end):
             return True
     return False
 
-# --- rotas ---
+# --- rotas (exemplo básico, você pode completar) ---
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -72,7 +75,6 @@ def reservas():
     rows = cur.fetchall()
     result = []
     for r in rows:
-        # Usa exatamente a data de saída do banco
         result.append({
             'id': r['id'],
             'title': f"Chalé {r['chale']} — {r['nome']}",
@@ -87,56 +89,7 @@ def reservas():
         })
     return jsonify(result)
 
-@app.route('/criar', methods=['POST'])
-def criar():
-    db = get_db()
-    nome = request.form['nome']
-    telefone = request.form.get('telefone', '')
-    valor = request.form.get('valor', 0)
-    observacao = request.form.get('observacao', '')
-    chale = int(request.form['chale'])
-    entrada = request.form['entrada']
-    saida = request.form['saida']
-
-    if has_conflict(chale, entrada, saida):
-        return jsonify({'success': False, 'error': 'Conflito de datas'})
-
-    db.execute(
-        'INSERT INTO reservas (chale, nome, telefone, valor, observacao, entrada, saida) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        (chale, nome, telefone, valor, observacao, entrada, saida)
-    )
-    db.commit()
-    return jsonify({'success': True})
-
-@app.route('/atualizar', methods=['POST'])
-def atualizar():
-    db = get_db()
-    id_ = int(request.form['id'])
-    nome = request.form['nome']
-    telefone = request.form.get('telefone', '')
-    valor = request.form.get('valor', 0)
-    observacao = request.form.get('observacao', '')
-    chale = int(request.form['chale'])
-    entrada = request.form['entrada']
-    saida = request.form['saida']
-
-    if has_conflict(chale, entrada, saida, exclude_id=id_):
-        return jsonify({'success': False, 'error': 'Conflito de datas'})
-
-    db.execute(
-        'UPDATE reservas SET nome=?, telefone=?, valor=?, observacao=?, chale=?, entrada=?, saida=? WHERE id=?',
-        (nome, telefone, valor, observacao, chale, entrada, saida, id_)
-    )
-    db.commit()
-    return jsonify({'success': True})
-
-@app.route('/remover', methods=['POST'])
-def remover():
-    db = get_db()
-    id_ = int(request.form['id'])
-    db.execute('DELETE FROM reservas WHERE id=?', (id_,))
-    db.commit()
-    return jsonify({'success': True})
+# ⚠️ Lembre-se de adicionar as rotas /criar, /atualizar, /remover
 
 if __name__ == '__main__':
     init_db()
