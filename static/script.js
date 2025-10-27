@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   let currentEvent = null;
 
-  // Botão manual para criar reserva
   const addBtn = document.createElement('button');
   addBtn.textContent = '+ Nova reserva';
   addBtn.style.margin = '10px 0';
@@ -37,13 +36,11 @@ document.addEventListener('DOMContentLoaded', function() {
     headerToolbar: { left:'prev,next today', center:'title', right:'' },
     dateClick: function(info) {
       const entrada = info.dateStr;
-      const saida = new Date(new Date(entrada).getTime() + 24*60*60*1000).toISOString().slice(0,10);
+      const saida = info.dateStr; // mesma data inicial
       openCreateModal(entrada, saida);
     },
     select: function(info) {
-      const entrada = info.startStr;
-      const saida = new Date(new Date(entrada).getTime() + 24*60*60*1000).toISOString().slice(0,10);
-      openCreateModal(entrada, saida);
+      openCreateModal(info.startStr, info.endStr);
     },
     eventClick: function(info) {
       currentEvent = info.event;
@@ -69,14 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(data => {
         calendar.removeAllEvents();
         data.forEach(ev => {
-          // Adiciona 1 dia no end para o FullCalendar mostrar corretamente
-          const end = new Date(ev.end);
-          end.setDate(end.getDate() + 1);
-          calendar.addEvent({
-            ...ev,
-            start: ev.start,
-            end: end.toISOString().slice(0,10)
-          });
+          calendar.addEvent(ev); // usa exatamente start e end do servidor
         });
       });
   }
@@ -111,11 +101,7 @@ document.addEventListener('DOMContentLoaded', function() {
     form.elements['valor'].value = event.extendedProps.valor || '';
     form.elements['observacao'].value = event.extendedProps.observacao || '';
     form.elements['entrada'].value = event.startStr.slice(0,10);
-
-    // Ajusta end para mostrar corretamente no modal
-    const saida = new Date(event.endStr);
-    saida.setDate(saida.getDate() - 1);
-    form.elements['saida'].value = saida.toISOString().slice(0,10);
+    form.elements['saida'].value = event.endStr.slice(0,10); // sem ajuste
 
     const t = event.extendedProps.telefone || '';
     const clean = t.replace(/\D/g, '');
