@@ -11,9 +11,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   let currentEvent = null;
 
-  // 🟢 Botão manual para criar reserva (integrado ao topo do calendário)
+  // 🟢 Botão manual para criar reserva (com ícone)
   const addBtn = document.createElement('button');
-  addBtn.textContent = '+ Nova reserva';
+  addBtn.innerHTML = '➕ Nova reserva'; // ícone de "+" incluído
   addBtn.style.margin = '10px 0';
   addBtn.style.background = '#4caf50';
   addBtn.style.border = 'none';
@@ -49,13 +49,19 @@ document.addEventListener('DOMContentLoaded', function() {
     },
     eventDidMount: function(info) {
       const c = info.event.extendedProps.chale;
-      if (c == 1) info.el.style.backgroundColor = '#4caf50';
+      if (c == 1) info.el.style.backgroundColor = '#d3d3d3'; // azul claro uniforme
       if (c == 2) info.el.style.backgroundColor = '#2196f3';
       if (c == 3) info.el.style.backgroundColor = '#ff9800';
+    },
+    dayCellClassNames: function() {
+      return ['custom-calendar-bg']; // para aplicar cor de fundo do calendário
     }
   });
 
   calendar.render();
+
+  // Aplica fundo cinza claro no calendário
+  calendarEl.style.backgroundColor = '#d3d3d3';
 
   // 🔹 Buscar eventos do backend
   function fetchEvents(){
