@@ -269,11 +269,25 @@ document.addEventListener('DOMContentLoaded', function() {
     select: function(info) { openCreateModal(info.startStr, info.endStr); },
     eventClick: function(info) { currentEvent = info.event; openEditModal(info.event); },
     eventDidMount: function(info) {
-      const c = info.event.extendedProps.chale;
-      if (c == 1) info.el.style.backgroundColor = '#FFD700';
-      if (c == 2) info.el.style.backgroundColor = '#0057B7';
-      if (c == 3) info.el.style.backgroundColor = '#FFA500';
-    }
+  const el = info.el;
+  const c = info.event.extendedProps.chale;
+
+  // cores por chalé
+  let bgColor = '#FFD700'; // amarelo
+  let textColor = '#000';  // texto escuro
+  if(c == 2) { bgColor = '#0057B7'; textColor = '#fff'; } // azul
+  if(c == 3) { bgColor = '#FFA500'; textColor = '#fff'; } // laranja
+
+  // estilo moderno
+  el.style.backgroundColor = bgColor;
+  el.style.color = textColor;
+  el.style.borderRadius = '8px';
+  el.style.boxShadow = '0 2px 6px rgba(0,0,0,0.15)';
+  el.style.padding = '4px 6px';
+  el.style.border = 'none';
+  el.style.fontWeight = 'bold';
+  el.style.cursor = 'pointer';
+}
   });
 
   calendar.render();
