@@ -1,73 +1,104 @@
-body {
-  font-family: Arial, Helvetica, sans-serif;
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-  background: #f0f4fa;
-}
+document.addEventListener('DOMContentLoaded', function() {
+  const calendarEl = document.getElementById('calendar');
+  const modal = document.getElementById('modal');
+  const form = document.getElementById('reservaForm');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const saveBtn = document.getElementById('saveBtn');
+  const updateBtn = document.getElementById('updateBtn');
+  const removeBtn = document.getElementById('removeBtn');
+  const addBtn = document.getElementById('addReservaBtn');
+  const telefoneInput = document.getElementById('telefone');
+  const whatsappBtn = document.getElementById('whatsappBtn');
 
-.container {
-  max-width: 1100px;
-  margin: 20px auto;
-  padding: 20px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-}
+  let currentEvent = null;
 
-h1 { text-align: center; color: #0057B7; font-weight: bold; }
+  const calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: 'dayGridMonth',
+    selectable: true,
+    headerToolbar: { left:'prev,next today', center:'title', right:'dayGridMonth,timeGridWeek,listWeek' },
+    dateClick: info => openCreateModal(info.dateStr, info.dateStr),
+    select: info => openCreateModal(info.startStr, info.endStr),
+    eventClick: info => { currentEvent = info.event; openEditModal(info.event); },
+    eventDidMount: info => {
+      const c = info.event.extendedProps.chale;
+      let bg = '#FFD700', color = '#000';
+      if(c==2){ bg='#0057B7'; color='#fff'; }
+      if(c==3){ bg='#FFA500'; color='#fff'; }
+      Object.assign(info.el.style, { backgroundColor:bg, color:color, borderRadius:'8px', padding:'4px 6px', fontWeight:'bold', cursor:'pointer' });
+    }
+  });
+  calendar.render();
 
-.legend { display: flex; gap: 6px; margin: 10px 0; }
-.chip { padding: 6px 10px; border-radius: 12px; color: #fff; font-weight: bold; }
-.c1 { background: #FFD700; color:#000; }
-.c2 { background: #0057B7; }
-.c3 { background: #FFA500; }
+  addBtn.addEventListener('click', () => openCreateModal(new Date().toISOString(), new Date().toISOString()));
 
-#addReservaBtn {
-  background: #0057B7; color: #FFD700;
-  border: none; padding: 10px 16px; border-radius: 8px;
-  font-weight: bold; cursor: pointer; margin-bottom: 10px;
-}
+  cancelBtn.addEventListener('click', closeModal);
+  modal.addEventListener('click', e => { if(e.target===modal) closeModal(); });
 
-#addReservaBtn:hover { opacity: 0.85; }
+  telefoneInput.addEventListener('input', () => {
+    const num = telefoneInput.value.replace(/\D/g,'');
+    whatsappBtn.disabled = num.length<11;
+  });
 
-/* Modal */
-.modal {
-  position: fixed; inset: 0; display: flex;
-  align-items: center; justify-content: center;
-  background: rgba(0,0,0,0.4); z-index: 9999;
-}
+  whatsappBtn.addEventListener('click', () => {
+    const num = telefoneInput.value.replace(/\D/g,'');
+    if(num.length>=11) window.open(`https://wa.me/55${num}`, '_blank');
+  });
 
-.hidden { display: none; }
+  function fetchEvents(){
+    fetch('/reservas').then(r=>r.json()).then(data=>{
+      calendar.removeAllEvents();
+      data.forEach(ev=>calendar.addEvent(ev));
+    });
+  }
+  fetchEvents();
 
-.modal-content {
-  background: #fff; padding: 20px; border-radius: 10px;
-  width: 400px; max-width: 95%; box-shadow: 0 6px 16px rgba(0,0,0,0.25);
-}
+  function openCreateModal(start,end){
+    currentEvent=null;
+    modal.classList.remove('hidden');
+    form.reset();
+    saveBtn.classList.remove('hidden'); updateBtn.classList.add('hidden'); removeBtn.classList.add('hidden');
+    form.elements['entrada'].value=start.slice(0,10);
+    form.elements['saida'].value=end.slice(0,10);
+  }
 
-.modal-content h2 { text-align: center; color: #0057B7; }
+  function openEditModal(ev){
+    modal.classList.remove('hidden');
+    form.reset();
+    currentEvent=ev;
+    form.elements['id'].value=ev.id;
+    form.elements['chale'].value=ev.extendedProps.chale;
+    form.elements['nome'].value=ev.title.split(' — ').slice(1).join(' — ')||'';
+    form.elements['telefone'].value=ev.extendedProps.telefone||'';
+    form.elements['valor'].value=ev.extendedProps.valor||'';
+    form.elements['observacao'].value=ev.extendedProps.observacao||'';
+    form.elements['entrada'].value=ev.startStr.slice(0,10);
+    form.elements['saida'].value=ev.endStr?ev.endStr.slice(0,10):ev.startStr.slice(0,10);
+    saveBtn.classList.add('hidden'); updateBtn.classList.remove('hidden'); removeBtn.classList.remove('hidden');
+  }
 
-.modal-content form label { display: block; margin-top: 8px; font-weight: bold; }
-.modal-content input, select, textarea {
-  width: 100%; padding: 6px; margin-top: 4px;
-  border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;
-}
+  function closeModal(){ modal.classList.add('hidden'); form.reset(); currentEvent=null; }
 
-textarea { resize: vertical; }
+  form.addEventListener('submit', e=>{
+    e.preventDefault();
+    if(saveBtn.classList.contains('hidden')) return;
+    const fd=new FormData(form);
+    fetch('/criar',{method:'POST',body:fd}).then(r=>r.json()).then(resp=>{
+      if(resp.success){ closeModal(); fetchEvents(); } else alert(resp.error||'Erro');
+    });
+  });
 
-.actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; flex-wrap: wrap; }
-button { cursor: pointer; padding: 10px 16px; border-radius: 8px; border: 0; background: #0057B7; color: #FFD700; font-weight: bold; }
-button:hover { opacity: 0.85; }
-button.secondary { background: #9e9e9e; }
-button.danger { background: #d32f2f; }
+  updateBtn.addEventListener('click', ()=>{
+    const fd=new FormData(form);
+    fetch('/atualizar',{method:'POST',body:fd}).then(r=>r.json()).then(resp=>{
+      if(resp.success){ closeModal(); fetchEvents(); } else alert(resp.error||'Erro');
+    });
+  });
 
-.telefone-wrapper { display: flex; gap: 6px; align-items: center; }
-.telefone-wrapper input { flex: 1; }
-.whatsapp-btn { background: #25D366; color: #fff; border: none; border-radius: 6px; cursor: pointer; padding: 6px 10px; }
-.whatsapp-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
-@media(max-width:600px) {
-  .container { margin:10px; padding:12px; box-shadow:none; }
-  .modal-content { width:95%; max-height:90vh; overflow-y:auto; }
-  .actions button { flex:1 1 48%; padding:10px; }
-}
+  removeBtn.addEventListener('click', ()=>{
+    if(!confirm('Remover esta reserva?')) return;
+    const fd=new FormData(); fd.append('id', form.elements['id'].value);
+    fetch('/remover',{method:'POST',body:fd}).then(r=>r.json()).then(resp=>{
+      if(resp.success){ closeModal(); fetchEvents(); } else alert(resp.error||'Erro');
+    });
+  });
+});
