@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const modal = document.getElementById('modal');
   const form = document.getElementById('reservaForm');
   const cancelBtn = document.getElementById('cancelBtn');
-  const chaleFilter = document.getElementById('chaleFilter');
   const modalTitle = document.getElementById('modalTitle');
   const saveBtn = document.getElementById('saveBtn');
   const updateBtn = document.getElementById('updateBtn');
@@ -39,7 +38,6 @@ document.addEventListener('DOMContentLoaded', function() {
       timeGridWeek: { buttonText: 'Semana' },
       listWeek: { buttonText: 'Lista' }
     },
-    // 🟢 Clique em data (melhor compatibilidade mobile)
     dateClick: function(info) {
       openCreateModal(info.dateStr, info.dateStr);
     },
@@ -76,15 +74,12 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(r => r.json())
       .then(data => {
         calendar.removeAllEvents();
-        const filtro = chaleFilter.value;
         data.forEach(ev => {
-          if (filtro !== 'all' && String(ev.extendedProps.chale) !== filtro) return;
           calendar.addEvent(ev);
         });
       });
   }
 
-  chaleFilter.addEventListener('change', fetchEvents);
   fetchEvents();
 
   // 🟢 Criação de nova reserva
