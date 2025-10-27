@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   let currentEvent = null;
 
-  // 🟢 Botão manual para criar reserva (integrado ao topo do calendário)
+  // 🟢 Botão manual para criar reserva
   const addBtn = document.createElement('button');
   addBtn.textContent = '+ Nova reserva';
   addBtn.style.margin = '10px 0';
@@ -24,24 +24,37 @@ document.addEventListener('DOMContentLoaded', function() {
   addBtn.style.fontWeight = 'bold';
   addBtn.style.cursor = 'pointer';
   calendarEl.parentNode.insertBefore(addBtn, calendarEl);
-  addBtn.addEventListener('click', () => openCreateModal(new Date().toISOString(), new Date().toISOString()));
+  addBtn.addEventListener('click', () => {
+    const hoje = new Date();
+    const hojeISO = hoje.toISOString().slice(0,10);
+    const amanhaISO = new Date(hoje.getTime() + 24*60*60*1000).toISOString().slice(0,10);
+    openCreateModal(hojeISO, amanhaISO);
+  });
+
+  // Função para ajustar início e fim da reserva para meio-dia
+  function adjustEventTiming(ev){
+    const start = new Date(ev.start);
+    const end = new Date(ev.end);
+    start.setHours(12,0,0,0); // metade direita do dia inicial
+    end.setHours(12,0,0,0);   // metade esquerda do dia final
+    return {...ev, start: start.toISOString(), end: end.toISOString()};
+  }
 
   const calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: 'dayGridMonth',
     selectable: true,
-    headerToolbar: {
-      left: 'prev,next today',
-      center: 'title',
-      right: ''  // remove todas as views extras
-    },
-    views: {
-      dayGridMonth: { buttonText: 'Mês' }
-    },
+    headerToolbar: { left:'prev,next today', center:'title', right:'' },
+    views: { dayGridMonth: { buttonText:'Mês' } },
+    eventOverlap: true, // permite sobreposição
     dateClick: function(info) {
-      openCreateModal(info.dateStr, info.dateStr);
+      const entrada = info.dateStr;
+      const saida = new Date(new Date(entrada).getTime() + 24*60*60*1000).toISOString().slice(0,10);
+      openCreateModal(entrada, saida);
     },
     select: function(info) {
-      openCreateModal(info.startStr, info.endStr);
+      const entrada = info.startStr;
+      const saida = new Date(new Date(entrada).getTime() + 24*60*60*1000).toISOString().slice(0,10);
+      openCreateModal(entrada, saida);
     },
     eventClick: function(info) {
       currentEvent = info.event;
@@ -49,9 +62,11 @@ document.addEventListener('DOMContentLoaded', function() {
     },
     eventDidMount: function(info) {
       const c = info.event.extendedProps.chale;
-      if (c == 1) info.el.style.backgroundColor = '#4caf50';
-      if (c == 2) info.el.style.backgroundColor = '#2196f3';
-      if (c == 3) info.el.style.backgroundColor = '#ff9800';
+      if(c==1) info.el.style.backgroundColor = '#4caf50';
+      if(c==2) info.el.style.backgroundColor = '#2196f3';
+      if(c==3) info.el.style.backgroundColor = '#ff9800';
+      info.el.style.height = '14px';
+      info.el.style.marginTop = '2px';
     }
   });
 
@@ -64,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(data => {
         calendar.removeAllEvents();
         data.forEach(ev => {
-          calendar.addEvent(ev);
+          calendar.addEvent(adjustEventTiming(ev));
         });
       });
   }
@@ -81,12 +96,10 @@ document.addEventListener('DOMContentLoaded', function() {
     modal.classList.remove('hidden');
     form.reset();
 
-    const entrada = start.slice(0,10);
-    const saida = (end)
-      ? new Date(new Date(end).getTime()).toISOString().slice(0,10)
-      : entrada;
+    form.elements['entrada'].value = start.slice(0,10);
 
-    form.elements['entrada'].value = entrada;
+    // se end não fornecido, usar dia seguinte
+    const saida = end ? end.slice(0,10) : new Date(new Date(start).getTime() + 24*60*60*1000).toISOString().slice(0,10);
     form.elements['saida'].value = saida;
 
     setTimeout(() => form.elements['nome'].focus(), 150);
@@ -114,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const t = event.extendedProps.telefone || '';
     const clean = t.replace(/\D/g, '');
     const linkArea = document.getElementById('whatsappLinkArea');
-    if (clean.length >= 11) {
+    if(clean.length >= 11){
       linkArea.innerHTML = `
         <a href="https://wa.me/55${clean}" target="_blank" class="whatsapp-link" 
            style="display:inline-flex;align-items:center;gap:6px;color:#25D366;text-decoration:none;">
@@ -140,12 +153,12 @@ document.addEventListener('DOMContentLoaded', function() {
   // 🟩 Criar
   form.addEventListener('submit', function(e){
     e.preventDefault();
-    if (saveBtn.classList.contains('hidden')) return;
+    if(saveBtn.classList.contains('hidden')) return;
     const fd = new FormData(form);
-    fetch('/criar', { method: 'POST', body: fd })
+    fetch('/criar', { method:'POST', body: fd })
       .then(r => r.json())
       .then(resp => {
-        if (resp.success) {
+        if(resp.success){
           closeModal();
           fetchEvents();
         } else {
@@ -157,10 +170,10 @@ document.addEventListener('DOMContentLoaded', function() {
   // 🟦 Atualizar
   updateBtn.addEventListener('click', function(){
     const fd = new FormData(form);
-    fetch('/atualizar', { method: 'POST', body: fd })
+    fetch('/atualizar', { method:'POST', body: fd })
       .then(r => r.json())
       .then(resp => {
-        if (resp.success) {
+        if(resp.success){
           closeModal();
           fetchEvents();
         } else {
@@ -171,13 +184,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // 🟥 Remover
   removeBtn.addEventListener('click', function(){
-    if (!confirm('Remover esta reserva?')) return;
+    if(!confirm('Remover esta reserva?')) return;
     const fd = new FormData();
     fd.append('id', form.elements['id'].value);
-    fetch('/remover', { method: 'POST', body: fd })
+    fetch('/remover', { method:'POST', body: fd })
       .then(r => r.json())
       .then(resp => {
-        if (resp.success) {
+        if(resp.success){
           closeModal();
           fetchEvents();
         } else {
@@ -189,10 +202,10 @@ document.addEventListener('DOMContentLoaded', function() {
   // 📱 Máscara do telefone
   telefoneInput.addEventListener('input', () => {
     let v = telefoneInput.value.replace(/\D/g, '');
-    if (v.length > 11) v = v.slice(0,11);
-    if (v.length > 6) {
+    if(v.length > 11) v = v.slice(0,11);
+    if(v.length > 6){
       telefoneInput.value = `(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`;
-    } else if (v.length > 2) {
+    } else if(v.length > 2){
       telefoneInput.value = `(${v.slice(0,2)}) ${v.slice(2)}`;
     } else {
       telefoneInput.value = v;
