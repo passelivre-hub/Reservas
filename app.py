@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify, g
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
 
 DATABASE = 'reservas.db'
 
@@ -72,11 +72,13 @@ def reservas():
     rows = cur.fetchall()
     result = []
     for r in rows:
+        # Incrementa 1 dia para FullCalendar exibir corretamente o último dia
+        end_fc = (parse_date(r['saida']) + timedelta(days=1)).isoformat()
         result.append({
             'id': r['id'],
             'title': f"Chalé {r['chale']} — {r['nome']}",
             'start': r['entrada'],
-            'end': r['saida'],
+            'end': end_fc,
             'extendedProps': {
                 'chale': r['chale'],
                 'telefone': r['telefone'],
