@@ -1,6 +1,221 @@
-<div class="telefone-wrapper">
-  <input type="text" id="telefone" name="telefone" placeholder="(99) 99999-9999" required>
-  <a id="whatsappLink" class="whatsapp-btn" href="#" target="_blank" disabled>
-    <i class="fa fa-whatsapp"></i>
-  </a>
-</div>
+
+h1 {
+margin-top: 0;
+  font-size: 1.6em;
+  text-align: center;
+  color: #333;
+}
+
+#calendar {
+margin-top: 12px;
+}
+
+/* ================== Topo ================== */
+.top-actions {
+display: flex;
+justify-content: space-between;
+align-items: center;
+flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.top-actions label {
+  font-weight: bold;
+  margin-right: 6px;
+}
+
+.top-actions select {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+display: inline-block;
+padding: 6px 10px;
+border-radius: 12px;
+color: #fff;
+  margin-left: 6px;
+font-size: 0.9em;
+}
+
+@@ -51,7 +73,7 @@ h1 {
+align-items: center;
+justify-content: center;
+background: rgba(0,0,0,0.4);
+  z-index: 9999; /* mantém o modal acima do calendário */
+  z-index: 9999;
+}
+
+.hidden {
+@@ -62,27 +84,77 @@ h1 {
+background: #fff;
+padding: 18px;
+border-radius: 8px;
+  width: 360px;
+  width: 380px;
+max-width: 95%;
+box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+  z-index: 10000; /* garante que o conteúdo fique clicável */
+position: relative;
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  color: #1976d2;
+  font-size: 1.2em;
+  text-align: center;
+}
+
+.modal-content form label {
+display: block;
+margin-bottom: 8px;
+  font-weight: bold;
+  color: #333;
+}
+
+.modal-content input,
+.modal-content select,
+.modal-content textarea {
+width: 100%;
+  padding: 6px;
+  padding: 8px;
+margin-top: 4px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+box-sizing: border-box;
+  font-size: 0.95em;
+}
+
+textarea {
+  resize: vertical;
+}
+
+/* ================== Botão WhatsApp ================== */
+.telefone-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.telefone-wrapper input {
+  flex: 1;
+}
+
+.whatsapp-btn {
+  background: #25D366;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 1.2em;
+  padding: 8px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.whatsapp-btn:hover {
+  background: #1ebe5b;
+}
+
+.whatsapp-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ================== Botões ================== */
+.actions {
+display: flex;
+gap: 8px;
+@@ -93,11 +165,17 @@ h1 {
+
+button {
+cursor: pointer;
+  padding: 8px 10px;
+  padding: 8px 12px;
+border-radius: 6px;
+border: 0;
+background: #1976d2;
+color: #fff;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+button.secondary {
+@@ -110,25 +188,51 @@ button.danger {
+
+/* ================== Responsivo ================== */
+@media (max-width: 600px) {
+  .modal-content {
+    width: 95%;
+    padding: 12px;
+    font-size: 14px;
+    max-height: 90vh; /* evita ultrapassar a tela */
+    overflow-y: auto;  /* scroll interno se precisar */
+  body {
+    background: #eaeaea;
+}
+
+  .actions button {
+    flex: 1 1 48%; /* botões ocupam metade da tela */
+  h1 {
+    font-size: 1.3em;
+    text-align: center;
+}
+
+  #calendar {
+    font-size: 0.8em;
+  .container {
+    margin: 8px;
+    padding: 10px;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+.top-actions {
+flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    align-items: stretch;
+  }
+
+  .legend {
+    justify-content: center;
+    margin-top: 4px;
+  }
+
+  #calendar {
+    font-size: 0.8em;
+  }
+
+  .modal-content {
+    width: 95%;
+    padding: 14px;
+    font-size: 14px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .actions button {
+    flex: 1 1 48%;
+    padding: 10px;
+  }
+
+  .whatsapp-btn {
+    padding: 10px;
+    font-size: 1.4em;
+}
+}
