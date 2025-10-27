@@ -59,17 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
   calendar.render();
 
   // 🔹 Ajuste de view para celular
-  function resizeCalendar() {
-    if(window.innerWidth < 600){
-      calendar.changeView('listWeek');
-    } else {
-      calendar.changeView('dayGridMonth');
-    }
-  }
-  window.addEventListener('resize', resizeCalendar);
-  resizeCalendar();
-
-  function fetchEvents(){
+    function fetchEvents(){
     fetch('/reservas')
       .then(r => r.json())
       .then(data => {
