@@ -34,9 +34,16 @@ document.addEventListener('DOMContentLoaded', function() {
   // Função para ajustar início e fim da reserva para meio-dia
   function adjustEventTiming(ev){
     const start = new Date(ev.start);
-    const end = new Date(ev.end);
-    start.setHours(12,0,0,0); // metade direita do dia inicial
-    end.setHours(12,0,0,0);   // metade esquerda do dia final
+    let end = ev.end ? new Date(ev.end) : new Date(start.getTime() + 24*60*60*1000);
+
+    // Ajusta para meio-dia
+    start.setHours(12,0,0,0);
+    end.setDate(end.getDate()); // garante que pega o dia da saída
+    end.setHours(12,0,0,0);
+
+    // Como FullCalendar considera end exclusivo, adiciona 1 dia para desenhar corretamente
+    end.setDate(end.getDate() + 1);
+
     return {...ev, start: start.toISOString(), end: end.toISOString()};
   }
 
@@ -121,7 +128,9 @@ document.addEventListener('DOMContentLoaded', function() {
     form.elements['valor'].value = event.extendedProps.valor || '';
     form.elements['observacao'].value = event.extendedProps.observacao || '';
     form.elements['entrada'].value = event.startStr.slice(0,10);
-    form.elements['saida'].value = event.endStr ? event.endStr.slice(0,10) : event.startStr.slice(0,10);
+    form.elements['saida'].value = event.endStr 
+      ? new Date(new Date(event.endStr).getTime() - 24*60*60*1000).toISOString().slice(0,10)
+      : event.startStr.slice(0,10);
 
     // 🔗 Link WhatsApp
     const t = event.extendedProps.telefone || '';
@@ -148,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   cancelBtn.addEventListener('click', closeModal);
-  modal.addEventListener('click', (ev)=>{ if (ev.target === modal) closeModal(); });
+  modal.addEventListener('click', (ev)=>{ if(ev.target === modal) closeModal(); });
 
   // 🟩 Criar
   form.addEventListener('submit', function(e){
