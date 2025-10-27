@@ -31,18 +31,13 @@ document.addEventListener('DOMContentLoaded', function() {
     openCreateModal(hojeISO, amanhaISO);
   });
 
-  // 🔹 Ajusta início ao meio-dia e fim no último dia completo
+  // 🔹 Ajusta início ao meio-dia e fim às 11:59 do dia de saída
   function adjustEventTiming(ev){
     const start = new Date(ev.start);
     let end = ev.end ? new Date(ev.end) : new Date(start.getTime() + 24*60*60*1000);
 
-    // início ao meio-dia
-    start.setHours(12,0,0,0);
-
-    // fim no último dia completo
-    end.setDate(end.getDate());
-    end.setHours(0,0,0,0);
-    end.setDate(end.getDate() + 1); // garante que o último dia seja incluído
+    start.setHours(12,0,0,0);      // início ao meio-dia
+    end.setHours(11,59,59,999);    // fim às 11:59 do dia final
 
     return {...ev, start: start.toISOString(), end: end.toISOString()};
   }
