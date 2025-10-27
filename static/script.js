@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   let currentEvent = null;
 
-  // --- Botão manual para criar reserva ---
+  // Botão manual para criar reserva
   const addBtn = document.createElement('button');
   addBtn.textContent = '+ Nova reserva';
   addBtn.style.margin = '10px 0';
@@ -24,22 +24,12 @@ document.addEventListener('DOMContentLoaded', function() {
   addBtn.style.fontWeight = 'bold';
   addBtn.style.cursor = 'pointer';
   calendarEl.parentNode.insertBefore(addBtn, calendarEl);
-
   addBtn.addEventListener('click', () => {
     const hoje = new Date();
     const hojeISO = hoje.toISOString().slice(0,10);
     const amanhaISO = new Date(hoje.getTime() + 24*60*60*1000).toISOString().slice(0,10);
     openCreateModal(hojeISO, amanhaISO);
   });
-
-  // --- Ajusta início ao meio-dia e fim às 11:59 do dia de saída ---
-  function adjustEventTiming(ev){
-    const start = new Date(ev.start);
-    let end = ev.end ? new Date(ev.end) : new Date(start.getTime() + 24*60*60*1000);
-    start.setHours(12,0,0,0);
-    end.setHours(11,59,59,999);
-    return {...ev, start: start.toISOString(), end: end.toISOString()};
-  }
 
   const calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: 'dayGridMonth',
@@ -65,23 +55,8 @@ document.addEventListener('DOMContentLoaded', function() {
       let color = '#4caf50';
       if(c==2) color = '#2196f3';
       if(c==3) color = '#ff9800';
-
-      const start = new Date(info.event.start);
-      const end = new Date(info.event.end);
-      const startIsNoon = start.getHours() === 12;
-      const endIsMorning = end.getHours() === 11;
-
-      if(startIsNoon && endIsMorning){
-        el.style.background = color;
-      } else if(startIsNoon){
-        el.style.background = `linear-gradient(to right, transparent 0%, transparent 50%, ${color} 50%, ${color} 100%)`;
-      } else if(endIsMorning){
-        el.style.background = `linear-gradient(to right, ${color} 0%, ${color} 50%, transparent 50%, transparent 100%)`;
-      } else {
-        el.style.background = color;
-      }
-
-      el.style.height = window.innerWidth<=600?'18px':'14px';
+      el.style.background = color;
+      el.style.height = window.innerWidth <= 600 ? '18px' : '14px';
       el.style.marginTop = '2px';
     }
   });
@@ -94,14 +69,20 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(data => {
         calendar.removeAllEvents();
         data.forEach(ev => {
-          calendar.addEvent(adjustEventTiming(ev));
+          // Adiciona 1 dia no end para o FullCalendar mostrar corretamente
+          const end = new Date(ev.end);
+          end.setDate(end.getDate() + 1);
+          calendar.addEvent({
+            ...ev,
+            start: ev.start,
+            end: end.toISOString().slice(0,10)
+          });
         });
       });
   }
 
   fetchEvents();
 
-  // --- Modal criar ---
   function openCreateModal(start, end){
     currentEvent = null;
     modalTitle.textContent = 'Nova reserva';
@@ -110,12 +91,11 @@ document.addEventListener('DOMContentLoaded', function() {
     removeBtn.classList.add('hidden');
     modal.classList.remove('hidden');
     form.reset();
-    form.elements['entrada'].value = start.slice(0,10);
-    form.elements['saida'].value = end ? end.slice(0,10) : new Date(new Date(start).getTime() + 24*60*60*1000).toISOString().slice(0,10);
+    form.elements['entrada'].value = start;
+    form.elements['saida'].value = end;
     setTimeout(() => form.elements['nome'].focus(), 150);
   }
 
-  // --- Modal editar ---
   function openEditModal(event){
     modalTitle.textContent = `Reserva nº${event.id}`;
     saveBtn.classList.add('hidden');
@@ -132,20 +112,19 @@ document.addEventListener('DOMContentLoaded', function() {
     form.elements['observacao'].value = event.extendedProps.observacao || '';
     form.elements['entrada'].value = event.startStr.slice(0,10);
 
-    // Corrige data de saída para não mostrar +1 dia
-    if(event.end){
-      let endDate = new Date(event.end);
-      endDate.setDate(endDate.getDate() - 1);
-      form.elements['saida'].value = endDate.toISOString().slice(0,10);
-    } else {
-      form.elements['saida'].value = event.startStr.slice(0,10);
-    }
+    // Ajusta end para mostrar corretamente no modal
+    const saida = new Date(event.endStr);
+    saida.setDate(saida.getDate() - 1);
+    form.elements['saida'].value = saida.toISOString().slice(0,10);
 
     const t = event.extendedProps.telefone || '';
     const clean = t.replace(/\D/g, '');
     const linkArea = document.getElementById('whatsappLinkArea');
-    linkArea.innerHTML = (clean.length>=11) ? 
-      `<a href="https://wa.me/55${clean}" target="_blank" class="whatsapp-link">Enviar WhatsApp</a>` : '';
+    if(clean.length >= 11){
+      linkArea.innerHTML = `<a href="https://wa.me/55${clean}" target="_blank" class="whatsapp-link">Enviar WhatsApp</a>`;
+    } else {
+      linkArea.innerHTML = '';
+    }
   }
 
   function closeModal(){ 
@@ -155,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   cancelBtn.addEventListener('click', closeModal);
-  modal.addEventListener('click', (ev)=>{ if(ev.target === modal) closeModal(); });
+  modal.addEventListener('click', (ev)=>{ if (ev.target === modal) closeModal(); });
 
   form.addEventListener('submit', function(e){
     e.preventDefault();
@@ -196,5 +175,4 @@ document.addEventListener('DOMContentLoaded', function() {
       telefoneInput.value = v;
     }
   });
-
 });
