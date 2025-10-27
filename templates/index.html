@@ -1,148 +1,85 @@
-<!doctype html>
-<html lang="pt-BR">
+<!DOCTYPE html>
+<html lang="pt-br">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Cabanas Por do Sol</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cabanas Por do Sol</title>
 
-  <!-- FullCalendar (CDN) -->
-  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<!-- FullCalendar CSS/JS -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js"></script>
 
-  <link rel="stylesheet" href="/static/style.css">
-
-  <style>
-    /* botão de whatsapp ao lado do telefone */
-    .telefone-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .telefone-wrapper input {
-      flex: 1;
-    }
-
-    .whatsapp-btn {
-      background: #25D366;
-      border: none;
-      border-radius: 6px;
-      color: #fff;
-      font-size: 1.2em;
-      padding: 6px 10px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .whatsapp-btn:hover {
-      background: #1ebe5b;
-    }
-
-    .whatsapp-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    @media (max-width: 600px) {
-      .whatsapp-btn {
-        padding: 8px 10px;
-        font-size: 1.3em;
-      }
-    }
-  </style>
+<!-- Estilos próprios -->
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-  <div class="container">
-    <h1>Cabanas Por do Sol</h1>
+<div class="container">
+  <h1>Cabanas Por do Sol</h1>
 
-    <div class="top-actions">
-      <div class="legend">
-        <span class="chip c1">Chalé 1</span>
-        <span class="chip c2">Chalé 2</span>
-        <span class="chip c3">Chalé 3</span>
-      </div>
-    </div>
-
-    <div id="calendar"></div>
-
-    <!-- Modal -->
-    <div id="modal" class="modal hidden">
-      <div class="modal-content">
-        <h2 id="modalTitle">Criar reserva</h2>
-        <form id="reservaForm">
-          <input type="hidden" name="id" value="">
-
-          <label>Chalé
-            <select name="chale" required>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-            </select>
-          </label>
-
-          <label>Nome:
-            <input type="text" name="nome" required>
-          </label>
-
-          <label>Telefone:</label>
-          <div class="telefone-wrapper">
-            <input type="text" name="telefone" id="telefone">
-            <button type="button" id="whatsappBtn" class="whatsapp-btn" title="Abrir WhatsApp" disabled>
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#fff" viewBox="0 0 24 24">
-                <path d="M12 0C5.37 0 0 5.37 0 12c0 2.13.56 4.14 1.53 5.9L0 24l6.12-1.54c1.73 1.17 3.78 1.88 5.88 1.88C18.63 24 24 18.63 24 12S18.63 0 12 0zm6.55 16.58c-.24.67-1.44 1.3-1.98 1.38-.5.08-1.09.12-1.73-.25-1.2-.66-2.49-1.74-3.14-3.11-.57-1.21-.41-1.12-.77-1.19-.36-.07-1.32-.04-2.05-1.25-.73-1.21-.89-2.2-.73-2.4.16-.21.48-.29.72-.42.24-.13.53-.27.8-.4.26-.12.5-.08.68.06.18.14.7.67.93.9.23.23.47.53.73.72.26.19.43.18.71.12.27-.07 1.42-.64 1.65-.71.24-.07.44-.09.67.07.23.17.93.97 1.13 1.17.2.2.33.3.48.52.15.22.08.36.05.5-.03.14-.21.5-.33.69-.12.18-.23.38-.36.57-.13.18-.16.27-.1.45.06.18.42.72.5.85.07.12.11.2.17.33.06.13.03.23-.02.35z"/>
-              </svg>
-            </button>
-          </div>
-
-          <label>Valor:
-            <input type="number" step="0.01" name="valor">
-          </label>
-
-          <label>Observação:
-            <textarea name="observacao"></textarea>
-          </label>
-
-          <label>Entrada:
-            <input type="date" name="entrada" required>
-          </label>
-
-          <label>Saída:
-            <input type="date" name="saida" required>
-          </label>
-
-          <div id="whatsappLinkArea" style="margin-top:10px;"></div>
-
-          <div class="actions">
-            <button type="submit" id="saveBtn">Salvar</button>
-            <button type="button" id="updateBtn" class="hidden">Atualizar</button>
-            <button type="button" id="removeBtn" class="hidden">Remover</button>
-            <button type="button" id="cancelBtn">Cancelar</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
+  <div class="legend">
+    <span class="chip c1">Chalé 1</span>
+    <span class="chip c2">Chalé 2</span>
+    <span class="chip c3">Chalé 3</span>
   </div>
 
-  <script src="/static/script.js"></script>
+  <button id="addReservaBtn">+ Nova reserva</button>
 
-  <script>
-    const telefoneInput = document.getElementById('telefone');
-    const whatsappBtn = document.getElementById('whatsappBtn');
+  <div id="calendar"></div>
+</div>
 
-    telefoneInput.addEventListener('input', () => {
-      const num = telefoneInput.value.replace(/\D/g, '');
-      whatsappBtn.disabled = num.length < 11;
-    });
+<!-- Modal -->
+<div id="modal" class="modal hidden">
+  <div class="modal-content">
+    <h2 id="modalTitle">Nova Reserva</h2>
+    <form id="reservaForm">
+      <input type="hidden" name="id">
 
-    whatsappBtn.addEventListener('click', () => {
-      const num = telefoneInput.value.replace(/\D/g, '');
-      if (num.length >= 11) {
-        window.open(`https://wa.me/55${num}`, '_blank');
-      }
-    });
-  </script>
+      <label>Chalé
+        <select name="chale" required>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+        </select>
+      </label>
+
+      <label>Nome:
+        <input type="text" name="nome" required>
+      </label>
+
+      <label>Telefone:</label>
+      <div class="telefone-wrapper">
+        <input type="text" name="telefone" id="telefone">
+        <button type="button" id="whatsappBtn" class="whatsapp-btn" disabled>
+          WhatsApp
+        </button>
+      </div>
+
+      <label>Valor:
+        <input type="number" step="0.01" name="valor">
+      </label>
+
+      <label>Observação:
+        <textarea name="observacao"></textarea>
+      </label>
+
+      <label>Entrada:
+        <input type="date" name="entrada" required>
+      </label>
+
+      <label>Saída:
+        <input type="date" name="saida" required>
+      </label>
+
+      <div class="actions">
+        <button type="submit" id="saveBtn">Salvar</button>
+        <button type="button" id="updateBtn" class="hidden">Atualizar</button>
+        <button type="button" id="removeBtn" class="hidden">Remover</button>
+        <button type="button" id="cancelBtn">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
