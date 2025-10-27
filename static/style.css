@@ -1,188 +1,73 @@
-/* ================== Geral ================== */
 body {
   font-family: Arial, Helvetica, sans-serif;
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  background: #002855; /* azul institucional Pantone 302c */
+  background: #f0f4fa;
 }
 
 .container {
   max-width: 1100px;
   margin: 20px auto;
   padding: 20px;
-  background: #fff; /* mantém branco para contraste do calendário e formulário */
+  background: #fff;
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.15);
 }
 
-h1 {
-  margin-top: 0;
-  font-size: 2em;
-  text-align: center;
-  color: #FFD700; /* amarelo Pantone para destaque no azul */
-  font-weight: bold;
+h1 { text-align: center; color: #0057B7; font-weight: bold; }
+
+.legend { display: flex; gap: 6px; margin: 10px 0; }
+.chip { padding: 6px 10px; border-radius: 12px; color: #fff; font-weight: bold; }
+.c1 { background: #FFD700; color:#000; }
+.c2 { background: #0057B7; }
+.c3 { background: #FFA500; }
+
+#addReservaBtn {
+  background: #0057B7; color: #FFD700;
+  border: none; padding: 10px 16px; border-radius: 8px;
+  font-weight: bold; cursor: pointer; margin-bottom: 10px;
 }
 
-/* ================== Topo ================== */
-.top-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 12px;
-}
+#addReservaBtn:hover { opacity: 0.85; }
 
-.top-actions label {
-  font-weight: bold;
-  margin-right: 6px;
-}
-
-.top-actions select {
-  padding: 6px 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  font-weight: bold;
-}
-
-/* ================== Legenda ================== */
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 6px;
-}
-
-.chip {
-  display: inline-block;
-  padding: 6px 10px;
-  border-radius: 12px;
-  color: #fff;
-  font-size: 0.9em;
-  font-weight: bold;
-}
-
-.c1 { background: #FFD700; color:#000; } /* amarelo */
-.c2 { background: #0057B7; color:#fff; } /* azul */
-.c3 { background: #FFA500; color:#fff; } /* laranja */
-
-/* ================== Modal ================== */
+/* Modal */
 .modal {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0,0,0,0.4);
-  z-index: 9999;
+  position: fixed; inset: 0; display: flex;
+  align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.4); z-index: 9999;
 }
 
-.hidden {
-  display: none;
-}
+.hidden { display: none; }
 
 .modal-content {
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  width: 400px;
-  max-width: 95%;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
-  position: relative;
+  background: #fff; padding: 20px; border-radius: 10px;
+  width: 400px; max-width: 95%; box-shadow: 0 6px 16px rgba(0,0,0,0.25);
 }
 
-.modal-content h2 {
-  margin-top: 0;
-  color: #0057B7;
-  font-size: 1.4em;
-  text-align: center;
+.modal-content h2 { text-align: center; color: #0057B7; }
+
+.modal-content form label { display: block; margin-top: 8px; font-weight: bold; }
+.modal-content input, select, textarea {
+  width: 100%; padding: 6px; margin-top: 4px;
+  border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;
 }
 
-/* ================== Form ================== */
-.modal-content form label {
-  display: block;
-  margin-bottom: 6px;
-  font-weight: bold;
-  color: #333;
-}
+textarea { resize: vertical; }
 
-.modal-content input,
-.modal-content select,
-.modal-content textarea {
-  width: 100%;
-  padding: 8px;
-  margin-top: 4px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  box-sizing: border-box;
-  font-size: 0.95em;
-}
+.actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; flex-wrap: wrap; }
+button { cursor: pointer; padding: 10px 16px; border-radius: 8px; border: 0; background: #0057B7; color: #FFD700; font-weight: bold; }
+button:hover { opacity: 0.85; }
+button.secondary { background: #9e9e9e; }
+button.danger { background: #d32f2f; }
 
-textarea {
-  resize: vertical;
-}
+.telefone-wrapper { display: flex; gap: 6px; align-items: center; }
+.telefone-wrapper input { flex: 1; }
+.whatsapp-btn { background: #25D366; color: #fff; border: none; border-radius: 6px; cursor: pointer; padding: 6px 10px; }
+.whatsapp-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-/* ================== Botões ================== */
-.actions {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-  margin-top: 12px;
-  flex-wrap: wrap;
-}
-
-button {
-  cursor: pointer;
-  padding: 10px 16px;
-  border-radius: 8px;
-  border: 0;
-  background: #0057B7; /* azul corporativo */
-  color: #FFD700; /* amarelo */
-  font-weight: bold;
-  transition: 0.2s;
-}
-
-button:hover {
-  opacity: 0.85;
-}
-
-button.secondary {
-  background: #9e9e9e;
-}
-
-button.danger {
-  background: #d32f2f;
-}
-
-/* ================== WhatsApp ================== */
-.whatsapp-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: #25D366;
-  text-decoration: none;
-}
-
-/* ================== Responsivo ================== */
-@media (max-width: 600px) {
-  .container {
-    margin: 10px;
-    padding: 12px;
-    box-shadow: none;
-    border-radius: 8px;
-  }
-
-  .modal-content {
-    width: 95%;
-    padding: 14px;
-    font-size: 14px;
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-
-  .actions button {
-    flex: 1 1 48%;
-    padding: 10px;
-  }
+@media(max-width:600px) {
+  .container { margin:10px; padding:12px; box-shadow:none; }
+  .modal-content { width:95%; max-height:90vh; overflow-y:auto; }
+  .actions button { flex:1 1 48%; padding:10px; }
 }
