@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
   addBtn.addEventListener('click', () => openCreateModal(new Date().toISOString(), new Date().toISOString()));
 
   const calendar = new FullCalendar.Calendar(calendarEl, {
-    initialView: window.innerWidth < 600 ? 'listWeek' : 'dayGridMonth',
+    initialView: 'dayGridMonth',
     selectable: true,
     headerToolbar: {
       left: 'prev,next today',
