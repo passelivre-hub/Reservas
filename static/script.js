@@ -11,16 +11,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
   let currentEvent = null;
 
-  // 🟢 Botão manual para criar reserva
+  // 🟢 Botão manual para criar reserva (integrado ao topo do calendário)
   const addBtn = document.createElement('button');
   addBtn.textContent = '+ Nova reserva';
-  addBtn.style.marginBottom = '10px';
+  addBtn.style.margin = '10px 0';
   addBtn.style.background = '#4caf50';
   addBtn.style.border = 'none';
-  addBtn.style.padding = '8px 12px';
+  addBtn.style.padding = '10px 16px';
   addBtn.style.borderRadius = '6px';
   addBtn.style.color = '#fff';
-  addBtn.style.fontSize = '14px';
+  addBtn.style.fontSize = '16px';
+  addBtn.style.fontWeight = 'bold';
   addBtn.style.cursor = 'pointer';
   calendarEl.parentNode.insertBefore(addBtn, calendarEl);
   addBtn.addEventListener('click', () => openCreateModal(new Date().toISOString(), new Date().toISOString()));
@@ -31,12 +32,10 @@ document.addEventListener('DOMContentLoaded', function() {
     headerToolbar: {
       left: 'prev,next today',
       center: 'title',
-      right: 'dayGridMonth,timeGridWeek,listWeek'
+      right: ''  // remove todas as views extras
     },
     views: {
-      dayGridMonth: { buttonText: 'Mês' },
-      timeGridWeek: { buttonText: 'Semana' },
-      listWeek: { buttonText: 'Lista' }
+      dayGridMonth: { buttonText: 'Mês' }
     },
     dateClick: function(info) {
       openCreateModal(info.dateStr, info.dateStr);
@@ -58,8 +57,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   calendar.render();
 
-  // 🔹 Ajuste de view para celular
-    function fetchEvents(){
+  // 🔹 Buscar eventos do backend
+  function fetchEvents(){
     fetch('/reservas')
       .then(r => r.json())
       .then(data => {
@@ -111,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
     form.elements['entrada'].value = event.startStr.slice(0,10);
     form.elements['saida'].value = event.endStr ? event.endStr.slice(0,10) : event.startStr.slice(0,10);
 
-    // 🔗 Mostra link do WhatsApp com ícone SVG
+    // 🔗 Link WhatsApp
     const t = event.extendedProps.telefone || '';
     const clean = t.replace(/\D/g, '');
     const linkArea = document.getElementById('whatsappLinkArea');
