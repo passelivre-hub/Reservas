@@ -3,55 +3,31 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   margin: 0;
   padding: 0;
-  min-height: 100vh;
-  background: #002855; /* azul institucional Pantone 302c */
+  background: #f7f7f7;
 }
 
 .container {
   max-width: 1100px;
-  margin: 20px auto;
-  padding: 20px;
-  background: #fff; /* mantém branco para contraste do calendário e formulário */
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  margin: 18px auto;
+  padding: 18px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
 }
 
 h1 {
   margin-top: 0;
-  font-size: 2em;
-  text-align: center;
-  color: #FFD700; /* amarelo Pantone para destaque no azul */
-  font-weight: bold;
 }
 
-/* ================== Topo ================== */
+#calendar {
+  margin-top: 12px;
+}
+
 .top-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.top-actions label {
-  font-weight: bold;
-  margin-right: 6px;
-}
-
-.top-actions select {
-  padding: 6px 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  font-weight: bold;
-}
-
-/* ================== Legenda ================== */
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 6px;
 }
 
 .chip {
@@ -59,13 +35,13 @@ h1 {
   padding: 6px 10px;
   border-radius: 12px;
   color: #fff;
+  margin-left: 6px;
   font-size: 0.9em;
-  font-weight: bold;
 }
 
-.c1 { background: #FFD700; color:#000; } /* amarelo */
-.c2 { background: #0057B7; color:#fff; } /* azul */
-.c3 { background: #FFA500; color:#fff; } /* laranja */
+.c1 { background: #4caf50; }
+.c2 { background: #2196f3; }
+.c3 { background: #ff9800; }
 
 /* ================== Modal ================== */
 .modal {
@@ -75,7 +51,7 @@ h1 {
   align-items: center;
   justify-content: center;
   background: rgba(0,0,0,0.4);
-  z-index: 9999;
+  z-index: 9999; /* mantém o modal acima do calendário */
 }
 
 .hidden {
@@ -84,67 +60,44 @@ h1 {
 
 .modal-content {
   background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  width: 400px;
+  padding: 18px;
+  border-radius: 8px;
+  width: 360px;
   max-width: 95%;
   box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+  z-index: 10000; /* garante que o conteúdo fique clicável */
   position: relative;
 }
 
-.modal-content h2 {
-  margin-top: 0;
-  color: #0057B7;
-  font-size: 1.4em;
-  text-align: center;
-}
-
-/* ================== Form ================== */
 .modal-content form label {
   display: block;
-  margin-bottom: 6px;
-  font-weight: bold;
-  color: #333;
+  margin-bottom: 8px;
 }
 
 .modal-content input,
 .modal-content select,
 .modal-content textarea {
   width: 100%;
-  padding: 8px;
+  padding: 6px;
   margin-top: 4px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
   box-sizing: border-box;
-  font-size: 0.95em;
 }
 
-textarea {
-  resize: vertical;
-}
-
-/* ================== Botões ================== */
 .actions {
   display: flex;
   gap: 8px;
   justify-content: flex-end;
-  margin-top: 12px;
+  margin-top: 10px;
   flex-wrap: wrap;
 }
 
 button {
   cursor: pointer;
-  padding: 10px 16px;
-  border-radius: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
   border: 0;
-  background: #0057B7; /* azul corporativo */
-  color: #FFD700; /* amarelo */
-  font-weight: bold;
-  transition: 0.2s;
-}
-
-button:hover {
-  opacity: 0.85;
+  background: #1976d2;
+  color: #fff;
 }
 
 button.secondary {
@@ -155,34 +108,27 @@ button.danger {
   background: #d32f2f;
 }
 
-/* ================== WhatsApp ================== */
-.whatsapp-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: #25D366;
-  text-decoration: none;
-}
-
 /* ================== Responsivo ================== */
 @media (max-width: 600px) {
-  .container {
-    margin: 10px;
-    padding: 12px;
-    box-shadow: none;
-    border-radius: 8px;
-  }
-
   .modal-content {
     width: 95%;
-    padding: 14px;
+    padding: 12px;
     font-size: 14px;
-    max-height: 90vh;
-    overflow-y: auto;
+    max-height: 90vh; /* evita ultrapassar a tela */
+    overflow-y: auto;  /* scroll interno se precisar */
   }
 
   .actions button {
-    flex: 1 1 48%;
-    padding: 10px;
+    flex: 1 1 48%; /* botões ocupam metade da tela */
+  }
+
+  #calendar {
+    font-size: 0.8em;
+  }
+
+  .top-actions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
   }
 }
