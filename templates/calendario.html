@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Calendário de Reservas - Chalés</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- FullCalendar -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
+
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+    }
+    #calendar {
+      max-width: 1300px;
+      margin: 30px auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      padding: 20px;
+    }
+
+    /* Linhas de chalé */
+    .fc-resource {
+      text-align: left !important;
+      padding-left: 8px;
+      font-weight: 600;
+    }
+
+    /* Barras de reservas */
+    .fc-event {
+      border: none !important;
+      border-radius: 6px !important;
+      color: #fff !important;
+      font-size: 12px;
+      padding-left: 4px;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    .fc-event:hover {
+      transform: scale(1.05);
+      z-index: 10;
+    }
+
+    .chalé1 { background-color: #4caf50; }  /* verde */
+    .chalé2 { background-color: #2196f3; }  /* azul */
+    .chalé3 { background-color: #ff9800; }  /* laranja */
+  </style>
+</head>
+<body>
+
+  <div id="calendar"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const calendarEl = document.getElementById('calendar');
+
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'resourceTimelineMonth',
+        schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
+        aspectRatio: 2.2,
+        resourceAreaHeaderContent: 'Chalé',
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: ''
+        },
+        resources: [
+          { id: '1', title: 'Chalé 1' },
+          { id: '2', title: 'Chalé 2' },
+          { id: '3', title: 'Chalé 3' }
+        ],
+        events: '/eventos',
+        eventContent: function(arg) {
+          // mostra só o nome do hóspede
+          return { html: `<div>${arg.event.title}</div>` };
+        },
+        eventDidMount: function(info) {
+          const el = info.el;
+          const ev = info.event;
+          const c = ev.extendedProps.chale;
+
+          // define a cor base
+          let color = '#4caf50';
+          if (c == 2) color = '#2196f3';
+          if (c == 3) color = '#ff9800';
+
+          // verifica se é início ou fim
+          const start = new Date(ev.start);
+          const end = new Date(ev.end);
+          const startIsNoon = start.getHours() === 12;
+          const endIsMorning = end.getHours() === 11;
+
+          // aplica a cor de fundo com metades
+          if (startIsNoon && endIsMorning) {
+            el.style.background = color;
+          } else if (startIsNoon) {
+            el.style.background = `linear-gradient(to right, transparent 0%, transparent 50%, ${color} 50%, ${color} 100%)`;
+          } else if (endIsMorning) {
+            el.style.background = `linear-gradient(to right, ${color} 0%, ${color} 50%, transparent 50%, transparent 100%)`;
+          } else {
+            el.style.background = color;
+          }
+
+          el.classList.add(`chalé${c}`);
+        },
+        eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+        height: 'auto',
+        nowIndicator: true,
+        resourceOrder: 'id'
+      });
+
+      calendar.render();
+    });
+  </script>
+</body>
+</html>
