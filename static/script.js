@@ -31,17 +31,13 @@ document.addEventListener('DOMContentLoaded', function() {
     openCreateModal(hojeISO, amanhaISO);
   });
 
-  // 🔹 Função para ajustar o evento para meio-dia e desenhar corretamente
+  // 🔹 Ajusta início ao meio-dia e fim às 11:59
   function adjustEventTiming(ev){
     const start = new Date(ev.start);
     let end = ev.end ? new Date(ev.end) : new Date(start.getTime() + 24*60*60*1000);
 
-    // Definir horário 12:00 para início e fim (metade do quadrado)
-    start.setHours(12,0,0,0);
-    end.setHours(12,0,0,0);
-
-    // Somar 1 dia ao end para FullCalendar desenhar até o último dia
-    end.setDate(end.getDate() + 1);
+    start.setHours(12,0,0,0);      // início ao meio-dia
+    end.setHours(11,59,59,999);    // fim às 11:59
 
     return {...ev, start: start.toISOString(), end: end.toISOString()};
   }
@@ -51,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
     selectable: true,
     headerToolbar: { left:'prev,next today', center:'title', right:'' },
     views: { dayGridMonth: { buttonText:'Mês' } },
-    eventOverlap: true, // permite sobreposição
+    eventOverlap: true,
     dateClick: function(info) {
       const entrada = info.dateStr;
       const saida = new Date(new Date(entrada).getTime() + 24*60*60*1000).toISOString().slice(0,10);
@@ -104,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     form.elements['entrada'].value = start.slice(0,10);
 
-    // saída automática = dia seguinte
+    // Preenche automaticamente a data de saída como o dia seguinte
     const saida = end ? end.slice(0,10) : new Date(new Date(start).getTime() + 24*60*60*1000).toISOString().slice(0,10);
     form.elements['saida'].value = saida;
 
@@ -127,12 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
     form.elements['valor'].value = event.extendedProps.valor || '';
     form.elements['observacao'].value = event.extendedProps.observacao || '';
     form.elements['entrada'].value = event.startStr.slice(0,10);
-
-    // data de saída = end - 1 dia
-    const endDate = event.endStr 
-      ? new Date(new Date(event.endStr).getTime() - 24*60*60*1000).toISOString().slice(0,10) 
-      : event.startStr.slice(0,10);
-    form.elements['saida'].value = endDate;
+    form.elements['saida'].value = event.endStr ? event.endStr.slice(0,10) : event.startStr.slice(0,10);
 
     // 🔗 Link WhatsApp
     const t = event.extendedProps.telefone || '';
