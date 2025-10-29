@@ -25,7 +25,7 @@ cancelBtn.addEventListener('click', closeModal);
 
 // === ABRIR MODAL PARA CRIAR RESERVA ===
 function openCreateModal(dateStr) {
-  modalTitle.textContent = 'Nova reserva';
+  modalTitle.textContent = '+';
   saveBtn.classList.remove('hidden');
   updateBtn.classList.add('hidden');
   removeBtn.classList.add('hidden');
