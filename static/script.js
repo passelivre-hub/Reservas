@@ -25,7 +25,7 @@ cancelBtn.addEventListener('click', closeModal);
 
 // === ABRIR MODAL PARA CRIAR RESERVA ===
 function openCreateModal(dateStr) {
-  modalTitle.textContent = '+';
+  modalTitle.textContent = 'Nova Reserva';
   saveBtn.classList.remove('hidden');
   updateBtn.classList.add('hidden');
   removeBtn.classList.add('hidden');
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
     },
     customButtons: {
       novaReservaBtn: {
-        text: 'Nova Reserva',
+        text: '+',
         click: function() {
           const today = new Date();
           const tomorrow = new Date();
