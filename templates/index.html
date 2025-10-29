@@ -26,7 +26,7 @@
     <div id="calendar"></div>
   </div>
 
-  <!-- Form Modal -->
+  <!-- Modal de Reserva -->
   <div id="modal" class="modal hidden">
     <div class="modal-content">
       <h2 id="modalTitle">Criar reserva</h2>
@@ -51,6 +51,7 @@
             </button>
           </div>
         </label>
+
         <label>Pessoas: <input type="number" name="pessoas" min="1" value="2"></label>
         <label>Valor: <input type="text" name="valor" placeholder="0,00"></label>
         <label>Entrada: <input type="date" name="entrada" required></label>
@@ -60,78 +61,8 @@
         <div class="actions">
           <button type="submit" id="saveBtn">Salvar</button>
           <button type="button" id="updateBtn" class="hidden">Atualizar</button>
-          <button type="button" id="removeBtn" class="hidden danger">Remover</button>
-          <button type="button" id="cancelBtn" class="secondary">Cancelar</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <script src="/static/script.js"></script>
-</body>
-</html>
-<!doctype html>
-<html lang="pt-BR">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Cabanas Pôr do Sol</title>
-
-  <!-- FullCalendar (CDN) -->
-  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-
-  <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
-  <div class="container">
-    <h1>Cabanas Pôr do Sol</h1>
-
-    <div class="top-actions">
-      <div class="legend">
-        <span class="chip c1">Chalé 1</span>
-        <span class="chip c2">Chalé 2</span>
-        <span class="chip c3">Chalé 3</span>
-      </div>
-    </div>
-
-    <div id="calendar"></div>
-  </div>
-
-  <!-- Form Modal -->
-  <div id="modal" class="modal hidden">
-    <div class="modal-content">
-      <h2 id="modalTitle">Criar reserva</h2>
-      <form id="reservaForm">
-        <input type="hidden" name="id" value="">
-
-        <label>Chalé
-          <select name="chale" required>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-          </select>
-        </label>
-
-        <label>Nome: <input type="text" name="nome" required></label>
-
-        <label>Telefone:
-          <div class="telefone-whatsapp" style="display:flex; align-items:center; gap:6px;">
-            <input type="text" name="telefone" style="flex:1;">
-            <button type="button" id="whatsappBtn" title="WhatsApp">
-              <img src="/static/whatsapp-icon.png" alt="WhatsApp" style="width:16px; height:16px;">
-            </button>
-          </div>
-        </label>
-        <label>Pessoas: <input type="number" name="pessoas" min="1" value="2"></label>
-        <label>Valor: <input type="text" name="valor" placeholder="0,00"></label>
-        <label>Entrada: <input type="date" name="entrada" required></label>
-        <label>Saída: <input type="date" name="saida" required></label>
-        <label>Observação: <textarea name="observacao"></textarea></label>
-
-        <div class="actions">
-          <button type="submit" id="saveBtn">Salvar</button>
-          <button type="button" id="updateBtn" class="hidden">Atualizar</button>
+          <button type="button" id="checkinBtn" class="hidden secondary">Check-in</button>
+          <button type="button" id="checkoutBtn" class="hidden secondary">Check-out</button>
           <button type="button" id="removeBtn" class="hidden danger">Remover</button>
           <button type="button" id="cancelBtn" class="secondary">Cancelar</button>
         </div>

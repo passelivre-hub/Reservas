@@ -27,6 +27,7 @@ h1 {
   align-items: center;
   flex-wrap: wrap;
   margin-bottom: 4px;
+  gap: 8px;
 }
 
 .chip {
@@ -38,11 +39,14 @@ h1 {
   font-size: 0.9em;
   min-width: 70px;
   text-align: center;
+  border: 1px solid #000;
 }
 
-.c1 { background: #1c2842; border: 1px solid #000; } /* azul profundo */
-.c2 { background: #f8d492; color: #000; border: 1px solid #000; } /* amarelo */
-.c3 { background: #a8bba2; color: #000; border: 1px solid #000; } /* verde claro */
+/* === LEGENDAS === */
+.c1 { background: #1c2842; } /* Azul - Normal */
+.c2 { background: #f8d492; color: #000; } /* Amarelo - Observação */
+.c3 { background: #788674; } /* Verde - Check-in */
+.c4 { background: #90988e; } /* Cinza - Check-out */
 
 #calendar {
   margin-top: 12px;
@@ -52,6 +56,7 @@ h1 {
   box-shadow: inset 0 0 10px rgba(0,0,0,0.15);
 }
 
+/* TOOLBAR */
 .fc-toolbar {
   background-color: #1c2842;
   border-radius: 6px 6px 0 0;
@@ -104,10 +109,10 @@ h1 {
   color: #ffffff;
 }
 
-/* DIA DE HOJE - cinza clarinho */
+/* DIA DE HOJE */
 .fc-day-today {
-  background-color: #f2f2f2 !important; /* cinza clarinho */
-  border: 2px solid #ccc !important;     /* borda suave */
+  background-color: #f2f2f2 !important;
+  border: 2px solid #ccc !important;
 }
 
 .fc-daygrid-day-number {
@@ -123,6 +128,7 @@ h1 {
   padding: 2px 4px;
 }
 
+/* === MODAL === */
 .modal {
   position: fixed;
   inset: 0;
@@ -172,6 +178,7 @@ h1 {
   flex-wrap: wrap;
 }
 
+/* === BOTÕES === */
 button {
   cursor: pointer;
   padding: 8px 10px;
@@ -193,10 +200,11 @@ button.secondary {
 }
 
 button.danger {
-  background: #f8d492; /* amarelo igual ao chalé 2 */
+  background: #f8d492; /* amarelo igual à observação */
   color: #000;
 }
 
+/* === RESPONSIVO === */
 @media (max-width: 600px) {
   .modal-content {
     width: 95%;

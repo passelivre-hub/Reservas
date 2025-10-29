@@ -1,168 +1,113 @@
-from flask import Flask, render_template, request, jsonify, g
+from flask import Flask, render_template, request, jsonify
 import sqlite3
-from datetime import datetime, timedelta
-
-DATABASE = 'reservas.db'
 
 app = Flask(__name__)
-app.config['JSON_SORT_KEYS'] = False
+DATABASE = 'reservas.db'
 
-def get_db():
-    db = getattr(g, '_database', None)
-    if db is None:
-        db = g._database = sqlite3.connect(DATABASE)
-        db.row_factory = sqlite3.Row
-    return db
-
-@app.teardown_appcontext
-def close_connection(exception):
-    db = getattr(g, '_database', None)
-    if db is not None:
-        db.close()
 
 def init_db():
-    db = get_db()
-    db.execute('''
+    with sqlite3.connect(DATABASE) as db:
+        db.execute('''
         CREATE TABLE IF NOT EXISTS reservas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            chale INTEGER NOT NULL,
-            nome TEXT NOT NULL,
+            chale INTEGER,
+            nome TEXT,
             telefone TEXT,
+            pessoas INTEGER,
             valor REAL,
+            entrada TEXT,
+            saida TEXT,
             observacao TEXT,
-            entrada TEXT NOT NULL,
-            saida TEXT NOT NULL
+            status TEXT DEFAULT 'normal'
         )
-    ''')
-    db.commit()
+        ''')
 
-def parse_date(s):
-    return datetime.strptime(s, '%Y-%m-%d').date()
-
-def has_conflict(chale, nova_entrada, nova_saida, exclude_id=None, limite=2):
-    """
-    Retorna True se já houver o limite de reservas do chalé nesse período.
-    limite: número máximo de reservas permitidas para o mesmo chalé em um dia.
-    """
-    db = get_db()
-    params = [chale]
-    query = 'SELECT * FROM reservas WHERE chale = ?'
-    if exclude_id:
-        query += ' AND id != ?'
-        params.append(exclude_id)
-    cur = db.execute(query, params)
-    rows = cur.fetchall()
-
-    new_start = parse_date(nova_entrada)
-    new_end = parse_date(nova_saida)
-    dias = (new_end - new_start).days
-
-    for i in range(dias):
-        dia = new_start + timedelta(days=i)
-        count = 0
-        for r in rows:
-            exist_start = parse_date(r['entrada'])
-            exist_end = parse_date(r['saida'])
-            if exist_start <= dia < exist_end:
-                count += 1
-        if count >= limite:
-            return True
-    return False
 
 @app.route('/')
 def index():
-    init_db()
     return render_template('index.html')
 
+
 @app.route('/reservas')
-def listar_reservas():
-    db = get_db()
-    cur = db.execute('SELECT * FROM reservas')
-    rows = cur.fetchall()
-    eventos = []
-    for r in rows:
-        title = f"Chalé {r['chale']} — {r['nome']}"
-        # Corrige para que o FullCalendar cubra o dia de saída
-        end_date = (parse_date(r['saida']) + timedelta(days=1)).isoformat()
-        eventos.append({
-            'id': r['id'],
-            'title': title,
-            'start': r['entrada'],
-            'end': end_date,
-            'extendedProps': {
-                'telefone': r['telefone'],
-                'valor': r['valor'],
-                'observacao': r['observacao'],
-                'chale': r['chale']
+def listar():
+    with sqlite3.connect(DATABASE) as db:
+        cur = db.execute('SELECT id, chale, nome, telefone, pessoas, valor, entrada, saida, observacao, status FROM reservas')
+        data = [
+            {
+                'id': r[0],
+                'title': f"Chalé {r[1]} — {r[2]}",
+                'start': r[6],
+                'end': r[7],
+                'extendedProps': {
+                    'chale': r[1],
+                    'telefone': r[3],
+                    'pessoas': r[4],
+                    'valor': r[5],
+                    'observacao': r[8],
+                    'status': r[9]
+                }
             }
-        })
-    return jsonify(eventos)
+            for r in cur.fetchall()
+        ]
+    return jsonify(data)
+
 
 @app.route('/criar', methods=['POST'])
-def criar_reserva():
-    data = request.form or request.json
-    try:
-        chale = int(data.get('chale'))
-        nome = data.get('nome')
-        telefone = data.get('telefone')
-        valor = data.get('valor') or 0
-        observacao = data.get('observacao') or ''
-        entrada = data.get('entrada')
-        saida = data.get('saida')
-        if not nome or not entrada or not saida:
-            return jsonify({'success': False, 'error': 'Campos obrigatórios em falta.'}), 400
+def criar():
+    data = request.form
+    observacao = data.get('observacao', '').strip()
+    status = 'observacao' if observacao else 'normal'
 
-        if has_conflict(chale, entrada, saida, limite=2):
-            return jsonify({'success': False, 'error': 'Conflito: limite de reservas atingido para este chalé nesse dia.'}), 400
-
-        db = get_db()
-        db.execute('''INSERT INTO reservas (chale,nome,telefone,valor,observacao,entrada,saida)
-                      VALUES (?, ?, ?, ?, ?, ?, ?)''',
-                   (chale, nome, telefone, float(valor), observacao, entrada, saida))
+    with sqlite3.connect(DATABASE) as db:
+        db.execute('''
+        INSERT INTO reservas (chale, nome, telefone, pessoas, valor, entrada, saida, observacao, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            data['chale'], data['nome'], data['telefone'], data['pessoas'],
+            data['valor'], data['entrada'], data['saida'], observacao, status
+        ))
         db.commit()
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+    return jsonify({'success': True})
+
 
 @app.route('/atualizar', methods=['POST'])
-def atualizar_reserva():
-    data = request.form or request.json
-    try:
-        rid = int(data.get('id'))
-        chale = int(data.get('chale'))
-        nome = data.get('nome')
-        telefone = data.get('telefone')
-        valor = data.get('valor') or 0
-        observacao = data.get('observacao') or ''
-        entrada = data.get('entrada')
-        saida = data.get('saida')
-        if not nome or not entrada or not saida:
-            return jsonify({'success': False, 'error': 'Campos obrigatórios em falta.'}), 400
+def atualizar():
+    data = request.form
+    observacao = data.get('observacao', '').strip()
+    status = 'observacao' if observacao else 'normal'
 
-        if has_conflict(chale, entrada, saida, exclude_id=rid, limite=2):
-            return jsonify({'success': False, 'error': 'Conflito: limite de reservas atingido para este chalé nesse dia.'}), 400
-
-        db = get_db()
-        db.execute('''UPDATE reservas SET chale=?,nome=?,telefone=?,valor=?,observacao=?,entrada=?,saida=? WHERE id=?''',
-                   (chale, nome, telefone, float(valor), observacao, entrada, saida, rid))
+    with sqlite3.connect(DATABASE) as db:
+        db.execute('''
+        UPDATE reservas
+        SET chale=?, nome=?, telefone=?, pessoas=?, valor=?, entrada=?, saida=?, observacao=?, status=?
+        WHERE id=?
+        ''', (
+            data['chale'], data['nome'], data['telefone'], data['pessoas'],
+            data['valor'], data['entrada'], data['saida'], observacao, status, data['id']
+        ))
         db.commit()
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+    return jsonify({'success': True})
+
 
 @app.route('/remover', methods=['POST'])
-def remover_reserva():
-    data = request.form or request.json
-    try:
-        rid = int(data.get('id'))
-        db = get_db()
-        db.execute('DELETE FROM reservas WHERE id=?', (rid,))
+def remover():
+    id_ = request.form.get('id')
+    with sqlite3.connect(DATABASE) as db:
+        db.execute('DELETE FROM reservas WHERE id=?', (id_,))
         db.commit()
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+    return jsonify({'success': True})
+
+
+@app.route('/atualizar_status', methods=['POST'])
+def atualizar_status():
+    id_ = request.form.get('id')
+    status = request.form.get('status')
+    with sqlite3.connect(DATABASE) as db:
+        db.execute('UPDATE reservas SET status=? WHERE id=?', (status, id_))
+        db.commit()
+    return jsonify({'success': True})
+
 
 if __name__ == '__main__':
-    with app.app_context():
-        init_db()
+    init_db()
     app.run(host='0.0.0.0', port=5000, debug=True)
